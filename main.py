@@ -10,8 +10,12 @@ load_dotenv()
 
 app = FastAPI(title="App del Clima")
 
-# Montar archivos estáticos
+# Montar archivos estáticos explícitamente
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Si no existe la carpeta static, créala
+if not os.path.exists("static"):
+    os.makedirs("static")
 
 # Configuración
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
@@ -20,6 +24,10 @@ BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 @app.get("/")
 async def read_root():
     return FileResponse("templates/index.html")
+
+@app.get("/api/clima")
+async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None):
+    # ... todo el resto de tu función igual ...
 
 @app.get("/api/clima")
 async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None):
