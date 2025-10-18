@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clima En Vivo</title>
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Íconos Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-6">
+    <div id="app" class="max-w-md w-full">
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="text-center text-white">
+                <i class="fas fa-cloud text-4xl mb-3"></i>
+                <h1 class="text-3xl font-light tracking-tight">Clima En Vivo</h1>
+                <p class="text-white/80 mt-2">Consulta el clima de hoy</p>
+            </div>
+
+            <!-- Búsqueda -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+                <div class="flex space-x-3">
+                    <input 
+                        v-model="ciudad"
+                        @keypress.enter="buscarClima"
+                        type="text" 
+                        placeholder="Ingresa una ciudad..."
+                        class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                    >
+                    <button 
+                        @click="buscarClima"
+                        class="px-6 py-3 bg-white/20 hover:bg-white/30 border border-white/30 rounded-xl text-white transition-all duration-200 hover:scale-105"
+                    >
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <button 
+                    @click="obtenerUbicacion"
+                    class="w-full px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                    <i class="fas fa-location-arrow"></i>
+                    <span>Usar mi ubicación</span>
+                </button>
+            </div>
+
+            <!-- Loading -->
+            <div v-if="loading" class="glass-card rounded-2xl p-8 text-center text-white">
+                <i class="fas fa-spinner fa-spin text-2xl mb-3"></i>
+                <p>Buscando información del clima...</p>
+            </div>
+
+            <!-- Error -->
+            <div v-if="error" class="glass-card rounded-2xl p-4 bg-red-400/20 border border-red-400/30 text-white text-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                {{ error }}
+            </div>
+
+            <!-- Resultados del Clima -->
+            <div v-if="datosClima" class="glass-card rounded-2xl p-6 text-white">
+                <!-- Ciudad y Temperatura -->
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-light">{{ datosClima.ciudad }}, {{ datosClima.pais }}</h2>
+                    <div class="text-5xl font-thin mt-2">{{ datosClima.temperatura }}°</div>
+                    <p class="text-white/80 mt-1">{{ datosClima.descripcion }}</p>
+                </div>
+
+                <!-- Icono del Clima -->
+                <div class="text-center mb-6">
+                    <img 
+                         :src="`https://openweathermap.org/img/wn/${datosClima.icono}@2x.png`" 
+                         :alt="datosClima.descripcion"
+                         :title="datosClima.descripcion"
+                          class="w-24 h-24 mx-auto">
+                </div>
+
+                <!-- Detalles -->
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="bg-white/10 rounded-lg p-3 text-center">
+                        <i class="fas fa-temperature-low mb-1"></i>
+                        <div class="font-medium">Sensación</div>
+                        <div class="text-white/80">{{ datosClima.sensacion_termica }}°C</div>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-3 text-center">
+                        <i class="fas fa-tint mb-1"></i>
+                        <div class="font-medium">Humedad</div>
+                        <div class="text-white/80">{{ datosClima.humedad }}%</div>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-3 text-center">
+                        <i class="fas fa-wind mb-1"></i>
+                        <div class="font-medium">Viento</div>
+                        <div class="text-white/80">{{ datosClima.viento }} m/s</div>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-3 text-center">
+                        <i class="fas fa-map-marker-alt mb-1"></i>
+                        <div class="font-medium">Ubicación</div>
+                        <div class="text-white/80">{{ datosClima.ciudad }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado inicial -->
+            <div v-if="!datosClima && !loading && !error" class="glass-card rounded-2xl p-8 text-center text-white/70">
+                <i class="fas fa-cloud text-3xl mb-3"></i>
+                <p>Ingresa una ciudad o usa tu ubicación para comenzar</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Vue.js -->
+    <script>
+        const { createApp, ref } = Vue;
+        
+        createApp({
+            setup() {
+                // Estados reactivos
+                const ciudad = ref('');
+                const datosClima = ref(null);
+                const loading = ref(false);
+                const error = ref('');
+                
+                // Función para buscar clima
+                const buscarClima = async () => {
+                    if (!ciudad.value.trim()) {
+                        error.value = 'Por favor ingresa una ciudad';
+                        return;
+                    }
+                    
+                    loading.value = true;
+                    error.value = '';
+                    datosClima.value = null;
+                    
+                    try {
+                        const response = await fetch(`/api/clima?ciudad=${encodeURIComponent(ciudad.value)}`);
+                        if (!response.ok) throw new Error('Error en la respuesta');
+                        
+                        datosClima.value = await response.json();
+                    } catch (err) {
+                        error.value = 'No se pudo obtener el clima. Intenta nuevamente.';
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+                
+                // Función para geolocalización
+                const obtenerUbicacion = () => {
+                    if (!navigator.geolocation) {
+                        error.value = 'Tu navegador no soporta geolocalización';
+                        return;
+                    }
+                    
+                    loading.value = true;
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const { latitude, longitude } = position.coords;
+                            try {
+                                const response = await fetch(`/api/clima?lat=${latitude}&lon=${longitude}`);
+                                datosClima.value = await response.json();
+                                ciudad.value = datosClima.value.ciudad;
+                            } catch (err) {
+                                error.value = 'Error obteniendo ubicación';
+                            } finally {
+                                loading.value = false;
+                            }
+                        },
+                        () => {
+                            error.value = 'No se pudo acceder a tu ubicación';
+                            loading.value = false;
+                        }
+                    );
+                };
+                
+                return {
+                    ciudad,
+                    datosClima,
+                    loading,
+                    error,
+                    buscarClima,
+                    obtenerUbicacion
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
