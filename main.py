@@ -64,5 +64,9 @@ async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail="Error al conectar con la API del clima")
 
-# Montar archivos estáticos al final para evitar conflictos
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Montar archivos estáticos solo si la carpeta existe
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    print("✅ Static files mounted successfully")
+except Exception as e:
+    print(f"⚠️  Static files not mounted: {e}")
