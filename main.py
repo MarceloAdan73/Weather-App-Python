@@ -10,13 +10,6 @@ load_dotenv()
 
 app = FastAPI(title="App del Clima")
 
-# Montar archivos estáticos explícitamente
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Si no existe la carpeta static, créala
-if not os.path.exists("static"):
-    os.makedirs("static")
-
 # Configuración
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
@@ -25,9 +18,9 @@ BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 async def read_root():
     return FileResponse("templates/index.html")
 
-@app.get("/api/clima")
-async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None):
-    # ... todo el resto de tu función igual ...
+@app.get("/healthz")
+async def health_check():
+    return {"status": "healthy", "message": "Service is running"}
 
 @app.get("/api/clima")
 async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None):
@@ -56,6 +49,7 @@ async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None
         response.raise_for_status()
         datos = response.json()
         
+        # Procesar y formatear los datos
         return {
             "ciudad": datos["name"],
             "pais": datos["sys"]["country"],
@@ -69,3 +63,6 @@ async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None
     
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail="Error al conectar con la API del clima")
+
+# Montar archivos estáticos al final para evitar conflictos
+app.mount("/static", StaticFiles(directory="static"), name="static")
