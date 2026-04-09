@@ -1,55 +1,57 @@
-# Entornos virtuales de Python
+# Python
 venv/
 env/
-.benv/
 .venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Archivos de entorno
+# Entornos virtuales
+.benv/
+
+# Variables de entorno (NO subir .env en desarrollo)
+# En Render se configuran como Environment Variables
 .env
+.env.local
 .secrets
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-
-# VS Code
+# IDEs
 .vscode/
+.idea/
+*.swp
+*.swo
 *.code-workspace
 
-# Sistema
+# OS
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
+logs/
 
-# Archivos temporales
-*.tmp
-*.temp
-
-# Archivos de base de datos
-*.db
-*.sqlite
-*.sqlite3
-
-# Archivos de IDE
-.idea/
-*.swp
-*.swo
-
-# Archivos de distribución
-dist/
-build/
-*.egg-info/
-
-# Archivos de cobertura
+# Testing
+.pytest_cache/
 .coverage
 htmlcov/
 
-# Archivos de testing
-.pytest_cache/
-.tox/
+# Cache
+.ruff_cache/
+.mypy_cache/

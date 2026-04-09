@@ -5,51 +5,49 @@ import requests
 import os
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
 load_dotenv()
 
-app = FastAPI(title="App del Clima")
+app = FastAPI(title="Weather App", description="Aplicación del clima con FastAPI")
 
-# Configuración
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
+
 
 @app.get("/")
 async def read_root():
     return FileResponse("templates/index.html")
 
+
 @app.get("/healthz")
 async def health_check():
-    return {"status": "healthy", "message": "Service is running"}
+    return {"status": "healthy", "service": "weather-app"}
+
 
 @app.get("/api/clima")
 async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None):
-    """
-    Obtiene el clima por ciudad o por coordenadas GPS
-    """
     if not API_KEY:
-        raise HTTPException(status_code=500, detail="API Key no configurada")
-    
-    params = {
-        "appid": API_KEY,
-        "units": "metric",
-        "lang": "es"
-    }
-    
+        raise HTTPException(
+            status_code=500,
+            detail="API Key no configurada. Configure OPENWEATHER_API_KEY en las variables de entorno.",
+        )
+
+    params = {"appid": API_KEY, "units": "metric", "lang": "es"}
+
     if ciudad:
         params["q"] = ciudad
     elif lat and lon:
         params["lat"] = lat
         params["lon"] = lon
     else:
-        raise HTTPException(status_code=400, detail="Debe proporcionar ciudad o coordenadas")
-    
+        raise HTTPException(
+            status_code=400, detail="Debe proporcionar ciudad o coordenadas (lat, lon)"
+        )
+
     try:
-        response = requests.get(BASE_URL, params=params)
+        response = requests.get(BASE_URL, params=params, timeout=10)
         response.raise_for_status()
         datos = response.json()
-        
-        # Procesar y formatear los datos
+
         return {
             "ciudad": datos["name"],
             "pais": datos["sys"]["country"],
@@ -58,15 +56,22 @@ async def obtener_clima(ciudad: str = None, lat: float = None, lon: float = None
             "humedad": datos["main"]["humidity"],
             "descripcion": datos["weather"][0]["description"].title(),
             "icono": datos["weather"][0]["icon"],
-            "viento": datos["wind"]["speed"]
+            "viento": round(datos["wind"]["speed"] * 3.6, 1),
         }
-    
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail="Error al conectar con la API del clima")
 
-# Montar archivos estáticos solo si la carpeta existe
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Ciudad no encontrada")
+        raise HTTPException(
+            status_code=502, detail="Error en la respuesta de OpenWeatherMap"
+        )
+    except requests.exceptions.RequestException:
+        raise HTTPException(
+            status_code=503, detail="Error al conectar con la API del clima"
+        )
+
+
 try:
     app.mount("/static", StaticFiles(directory="static"), name="static")
-    print("✅ Static files mounted successfully")
-except Exception as e:
-    print(f"⚠️  Static files not mounted: {e}")
+except Exception:
+    pass

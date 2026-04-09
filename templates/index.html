@@ -3,195 +3,1186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clima En Vivo</title>
-    <!-- Vue.js -->
+    <title>Weather - Bahía Blanca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Íconos Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #18181b;
+            --bg-card: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #3f3f46;
         }
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                background: 
+                    radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 100%, rgba(129, 140, 248, 0.06) 0%, transparent 50%),
+                    var(--bg-primary);
+            }
+        }
+
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 1024px) {
+            .app::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: 
+                    radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
+                    radial-gradient(circle at 70% 80%, rgba(129, 140, 248, 0.03) 0%, transparent 40%);
+                pointer-events: none;
+                z-index: 0;
+            }
+            header, main, .actions {
+                position: relative;
+                z-index: 1;
+            }
+        }
+
+        /* Header Compact */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 32px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(9, 9, 11, 0.9) 100%);
+            position: relative;
+            gap: 20px;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.3;
+        }
+
+        .header-search {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            max-width: 500px;
+        }
+
+        .header-search .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+
+        .header-search .btn {
+            padding: 10px 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-action.small {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.05) rotate(-3deg);
+        }
+
+        .logo-icon svg { color: white; width: 24px; height: 24px; }
+
+        .logo-text h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .logo-text span { font-size: 12px; color: var(--text-muted); letter-spacing: 0.5px; }
+
+        .header-right { text-align: right; }
+        .header-time { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; }
+        .header-date { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+        /* Search Compact */
+        .search-bar {
+            padding: 14px 32px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--bg-primary);
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 600px;
+            padding: 14px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .search-input::placeholder { color: var(--text-muted); }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-ghost {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 14px;
+        }
+
+        .btn-ghost:hover { 
+            background: var(--bg-card); 
+            color: var(--text-primary); 
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content - Flex */
+        main {
+            flex: 1;
+            padding: 20px 32px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 16px;
+            min-height: 0;
+        }
+
+        /* Weather Main Card */
+        .weather-main {
+            background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(39, 39, 42, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .weather-main:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .weather-main::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .weather-main::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -20%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(129, 140, 248, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .weather-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .weather-location {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .badge svg { width: 14px; height: 14px; }
+
+        .weather-city {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 6px 0;
+            letter-spacing: -1px;
+        }
+
+        .weather-desc {
+            font-size: 18px;
+            color: var(--text-secondary);
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .weather-hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            min-height: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .weather-icon { 
+            font-size: 90px; 
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
+            transition: transform 0.3s ease;
+        }
+
+        .weather-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .temp-value {
+            font-size: 72px;
+            font-weight: 700;
+            letter-spacing: -4px;
+            line-height: 1;
+            background: linear-gradient(180deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .temp-value span {
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            -webkit-text-fill-color: var(--text-secondary);
+        }
+
+        /* Stats */
+        .weather-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .stat-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .stat-icon svg { color: var(--text-secondary); width: 20px; height: 20px; }
+
+        .stat-value { font-size: 20px; font-weight: 700; }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; }
+
+        /* Right Panel */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+        }
+
+        /* Forecast */
+        .forecast {
+            background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(39, 39, 42, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .forecast:hover {
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .forecast::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -30%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .section-title { 
+            font-size: 15px; 
+            font-weight: 600; 
+            margin-bottom: 18px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            padding-left: 14px;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 4px;
+            height: 18px;
+            background: linear-gradient(180deg, var(--accent) 0%, var(--accent-hover) 100%);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            height: calc(100% - 40px);
+        }
+
+        .forecast-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 18px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .forecast-item:hover {
+            border-color: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .forecast-item.active {
+            background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .forecast-day { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .forecast-item.active .forecast-day { color: rgba(255,255,255,0.8); }
+        
+        .forecast-icon { font-size: 32px; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+        .forecast-temp { font-size: 16px; font-weight: 600; }
+
+        /* Cities */
+        .cities {
+            background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(39, 39, 42, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cities:hover {
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .cities::before {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -20%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(129, 140, 248, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .cities-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .city-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .city-item:hover { 
+            background: var(--bg-primary); 
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .city-flag {
+            width: 42px;
+            height: 42px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .city-name { font-size: 14px; font-weight: 600; }
+        .city-country { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Actions */
+        .actions {
+            padding: 14px 32px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(24, 24, 27, 0.8) 100%);
+            position: relative;
+        }
+
+        .actions::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.3;
+        }
+
+        .btn-action {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(99, 102, 241, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-action:hover { 
+            background: var(--bg-card); 
+            color: var(--text-primary); 
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-action:hover::before {
+            opacity: 1;
+        }
+
+        /* Loading */
+        .loading {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .loading::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--bg-card);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        @keyframes spin { 
+            to { transform: rotate(360deg); } 
+        }
+
+        /* Initial */
+        .initial {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .initial::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .initial::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            right: 15%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(129, 140, 248, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .initial-icon { 
+            font-size: 70px; 
+            margin-bottom: 16px; 
+            filter: drop-shadow(0 12px 32px rgba(99, 102, 241, 0.4));
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .initial-title { 
+            font-size: 28px; 
+            font-weight: 700; 
+            margin-bottom: 8px; 
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(180deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .initial-subtitle { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            margin-bottom: 16px;
+            max-width: 350px;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-cities { 
+            display: flex; 
+            gap: 14px; 
+            flex-wrap: wrap; 
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .quick-btn:hover { 
+            background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+            border-color: var(--accent); 
+            color: white; 
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .quick-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Error */
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            color: #fca5a5;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (min-width: 1440px) {
+            .app {
+                max-width: 1400px;
+                margin: 0 auto;
+                box-shadow: 0 0 80px rgba(0,0,0,0.6);
+                border-radius: 0 0 28px 28px;
+                border: 1px solid var(--border);
+                border-top: none;
+            }
+            header, main, .actions {
+                padding-left: 64px;
+                padding-right: 64px;
+            }
+            .dashboard { gap: 32px; }
+            .weather-main { padding: 40px; }
+            .weather-main::before {
+                width: 400px;
+                height: 400px;
+            }
+            .logo-icon { width: 52px; height: 52px; }
+            .logo-icon svg { width: 26px; height: 26px; }
+            .logo-text h1 { font-size: 24px; }
+            .header-time { font-size: 26px; }
+            .search-input { padding: 16px 24px; font-size: 15px; }
+            .btn { padding: 16px 28px; font-size: 15px; }
+        }
+
+        @media (min-width: 1600px) {
+            .app { max-width: 1500px; }
+        }
+
+        @media (min-width: 1920px) {
+            .app { max-width: 1700px; }
+            header, main, .actions { padding-left: 96px; padding-right: 96px; }
+            .weather-city { font-size: 52px; }
+            .temp-value { font-size: 130px; }
+            .weather-icon { font-size: 160px; }
+            .section-title { font-size: 18px; }
+            .stat-value { font-size: 24px; }
+            .initial-title { font-size: 44px; }
+            .initial-subtitle { font-size: 18px; max-width: 500px; }
+        }
+
+        @media (max-width: 1024px) {
+            header, .header-search, main, .actions { padding-left: 24px; padding-right: 24px; }
+            .header-search { max-width: 300px; }
+            .dashboard { grid-template-columns: 1fr; gap: 20px; }
+            .weather-hero { gap: 20px; flex-wrap: wrap; justify-content: center; }
+            .weather-icon { font-size: 90px; }
+            .temp-value { font-size: 72px; }
+            .temp-value span { font-size: 28px; }
+            .weather-city { font-size: 28px; }
+            .weather-stats { grid-template-columns: repeat(2, 1fr); }
+            .weather-main { padding: 24px; }
+            .right-panel { gap: 16px; }
+            .forecast, .cities { padding: 20px; }
+            .app { min-width: auto; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+            .header-search { 
+                order: 3; 
+                max-width: 100%; 
+                width: 100%; 
+                flex-wrap: wrap;
+            }
+            .header-search .search-input { min-width: 70%; flex: 1 1 auto; }
+            .header-search .btn { padding: 10px 12px; }
+            .logo-text span { display: none; }
+            .logo-icon { width: 36px; height: 36px; }
+            .header-time { font-size: 18px; }
+            .header-date { font-size: 11px; }
+            .header-right { display: none; }
+            .search-bar { display: none; }
+            main { padding: 20px 16px; }
+            .weather-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-item { padding: 14px 10px; }
+            .stat-value { font-size: 16px; }
+            .stat-icon { width: 36px; height: 36px; }
+            .forecast-grid { 
+                grid-template-columns: repeat(5, minmax(60px, 1fr)); 
+                overflow-x: auto; 
+                padding-bottom: 8px;
+            }
+            .cities-grid { grid-template-columns: 1fr; gap: 10px; }
+            .weather-hero { flex-direction: column; gap: 16px; }
+            .weather-icon { font-size: 80px; }
+            .temp-value { font-size: 64px; }
+            .quick-cities { flex-direction: column; align-items: center; gap: 10px; }
+            .quick-btn { width: 100%; max-width: 280px; }
+            .actions { flex-wrap: wrap; justify-content: center; }
+            .btn-action { flex: 1 1 40%; max-width: 200px; justify-content: center; }
+            .initial-title { font-size: 28px; }
+            .initial-subtitle { font-size: 14px; }
+            .initial-icon { font-size: 70px; }
+        }
+
+        @media (max-width: 480px) {
+            header { padding: 10px 12px; }
+            .header-right { text-align: left; }
+            .header-time { font-size: 16px; }
+            .header-date { font-size: 10px; }
+            .weather-city { font-size: 24px; }
+            .weather-desc { font-size: 14px; }
+            .weather-stats { grid-template-columns: 1fr 1fr; }
+            .stat-item { padding: 12px 8px; }
+            .stat-label { font-size: 10px; }
+            .forecast { overflow: hidden; }
+            .forecast-grid { min-width: 0; }
+            .forecast-item { padding: 12px 6px; min-width: 60px; }
+            .forecast-icon { font-size: 24px; }
+            .forecast-temp { font-size: 14px; }
+            .city-item { padding: 10px; }
+            .city-flag { width: 36px; height: 36px; font-size: 18px; }
+            .city-name { font-size: 13px; }
+            .actions { padding: 12px 16px; }
+            .btn-action { padding: 10px 16px; font-size: 12px; }
+        }
+
+        @media (max-width: 360px) {
+            .weather-stats { grid-template-columns: 1fr; }
+            .weather-hero { padding: 16px 0; }
+            .weather-icon { font-size: 70px; }
+            .temp-value { font-size: 56px; }
+        }
+
+        @media (min-width: 2560px) {
+            .app { max-width: 2000px; }
+            header, main, .actions { padding-left: 120px; padding-right: 120px; }
+            .weather-city { font-size: 60px; }
+            .temp-value { font-size: 150px; }
+            .temp-value span { font-size: 50px; }
+            .weather-icon { font-size: 180px; }
+            .section-title { font-size: 20px; }
+            .stat-value { font-size: 28px; }
+            .initial-title { font-size: 52px; }
+            .initial-subtitle { font-size: 20px; max-width: 600px; }
+            .weather-stats { gap: 24px; }
+            .stat-item { padding: 28px 20px; }
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen flex items-center justify-center p-6">
-    <div id="app" class="max-w-md w-full">
-        <div class="space-y-6">
-            <!-- Header -->
-            <div class="text-center text-white">
-                <i class="fas fa-cloud text-4xl mb-3"></i>
-                <h1 class="text-3xl font-light tracking-tight">Clima En Vivo</h1>
-                <p class="text-white/80 mt-2">Consulta el clima de hoy</p>
-            </div>
-
-            <!-- Búsqueda -->
-            <div class="glass-card rounded-2xl p-6 space-y-4">
-                <div class="flex space-x-3">
-                    <input 
-                        v-model="ciudad"
-                        @keypress.enter="buscarClima"
-                        type="text" 
-                        placeholder="Ingresa una ciudad..."
-                        class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
-                    >
-                    <button 
-                        @click="buscarClima"
-                        class="px-6 py-3 bg-white/20 hover:bg-white/30 border border-white/30 rounded-xl text-white transition-all duration-200 hover:scale-105"
-                    >
-                        <i class="fas fa-search"></i>
-                    </button>
+<body>
+    <div id="app" class="app">
+        <header>
+            <div class="header-left">
+                <div class="logo" @click="volverInicio" style="cursor: pointer;">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <h1>Weather</h1>
+                    </div>
                 </div>
-                
-                <button 
-                    @click="obtenerUbicacion"
-                    class="w-full px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                    <i class="fas fa-location-arrow"></i>
-                    <span>Usar mi ubicación</span>
+                <button v-if="datosClima" class="btn-action small" @click="volverInicio">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
                 </button>
             </div>
+            <div class="header-search">
+                <input v-model="ciudad" @keypress.enter="buscarClima" type="text" placeholder="Buscar ciudad..." class="search-input">
+                <button class="btn btn-primary" @click="buscarClima">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </button>
+                <button v-if="datosClima" class="btn btn-ghost" @click="buscarClima">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                </button>
+                <button v-else class="btn btn-ghost" @click="obtenerUbicacion">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </button>
+            </div>
+            <div class="header-right">
+                <div class="header-time">{{ horaActual }}</div>
+                <div class="header-date">{{ fechaCompleta }}</div>
+            </div>
+        </header>
 
-            <!-- Loading -->
-            <div v-if="loading" class="glass-card rounded-2xl p-8 text-center text-white">
-                <i class="fas fa-spinner fa-spin text-2xl mb-3"></i>
-                <p>Buscando información del clima...</p>
+        <main>
+            <div v-if="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-muted); font-size: 14px;">Buscando clima...</p>
             </div>
 
-            <!-- Error -->
-            <div v-if="error" class="glass-card rounded-2xl p-4 bg-red-400/20 border border-red-400/30 text-white text-center">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                {{ error }}
-            </div>
+            <div v-else-if="error" class="error">{{ error }}</div>
 
-            <!-- Resultados del Clima -->
-            <div v-if="datosClima" class="glass-card rounded-2xl p-6 text-white">
-                <!-- Ciudad y Temperatura -->
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-light">{{ datosClima.ciudad }}, {{ datosClima.pais }}</h2>
-                    <div class="text-5xl font-thin mt-2">{{ datosClima.temperatura }}°</div>
-                    <p class="text-white/80 mt-1">{{ datosClima.descripcion }}</p>
+            <div v-else-if="datosClima" class="dashboard">
+                <div class="weather-main">
+                    <div class="weather-top">
+                        <div>
+                            <div class="weather-location">
+                                <span class="badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    {{ datosClima.pais }}
+                                </span>
+                            </div>
+                            <h2 class="weather-city">{{ datosClima.ciudad }}</h2>
+                            <p class="weather-desc">{{ datosClima.descripcion }}</p>
+                        </div>
+                    </div>
+
+                    <div class="weather-hero">
+                        <div class="weather-icon">{{ getWeatherEmoji(datosClima.icono) }}</div>
+                        <div>
+                            <div class="temp-value">{{ datosClima.temperatura }}<span>°</span></div>
+                        </div>
+                    </div>
+
+                    <div class="weather-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></div>
+                            <div class="stat-value">{{ datosClima.sensacion_termica }}°</div>
+                            <div class="stat-label">Sensación</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
+                            <div class="stat-value">{{ datosClima.humedad }}%</div>
+                            <div class="stat-label">Humedad</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg></div>
+                            <div class="stat-value">{{ datosClima.viento }}</div>
+                            <div class="stat-label">km/h</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                            <div class="stat-value">{{ horaActual }}</div>
+                            <div class="stat-label">Actual</div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Icono del Clima -->
-                <div class="text-center mb-6">
-                    <img 
-                         :src="`https://openweathermap.org/img/wn/${datosClima.icono}@2x.png`" 
-                         :alt="datosClima.descripcion"
-                         :title="datosClima.descripcion"
-                          class="w-24 h-24 mx-auto">
-                </div>
+                <div class="right-panel">
+                    <div class="forecast">
+                        <h3 class="section-title">Pronóstico 5 días</h3>
+                        <div class="forecast-grid">
+                            <div class="forecast-item" v-for="(dia, index) in pronostico" :key="index" :class="{ active: index === 0 }">
+                                <div class="forecast-day">{{ dia.dia }}</div>
+                                <div class="forecast-icon">{{ dia.icono }}</div>
+                                <div class="forecast-temp">{{ dia.temp }}°</div>
+                            </div>
+                        </div>
+                    </div>
 
-                <!-- Detalles -->
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div class="bg-white/10 rounded-lg p-3 text-center">
-                        <i class="fas fa-temperature-low mb-1"></i>
-                        <div class="font-medium">Sensación</div>
-                        <div class="text-white/80">{{ datosClima.sensacion_termica }}°C</div>
-                    </div>
-                    <div class="bg-white/10 rounded-lg p-3 text-center">
-                        <i class="fas fa-tint mb-1"></i>
-                        <div class="font-medium">Humedad</div>
-                        <div class="text-white/80">{{ datosClima.humedad }}%</div>
-                    </div>
-                    <div class="bg-white/10 rounded-lg p-3 text-center">
-                        <i class="fas fa-wind mb-1"></i>
-                        <div class="font-medium">Viento</div>
-                        <div class="text-white/80">{{ datosClima.viento }} m/s</div>
-                    </div>
-                    <div class="bg-white/10 rounded-lg p-3 text-center">
-                        <i class="fas fa-map-marker-alt mb-1"></i>
-                        <div class="font-medium">Ubicación</div>
-                        <div class="text-white/80">{{ datosClima.ciudad }}</div>
+                    <div class="cities">
+                        <h3 class="section-title">Explorar ciudades</h3>
+                        <div class="cities-grid">
+                            <div class="city-item" v-for="c in ciudades" :key="c.nombre" @click="irACiudad(c.nombre)">
+                                <div class="city-flag">{{ c.emoji }}</div>
+                                <div>
+                                    <div class="city-name">{{ c.nombre }}</div>
+                                    <div class="city-country">{{ c.pais }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Estado inicial -->
-            <div v-if="!datosClima && !loading && !error" class="glass-card rounded-2xl p-8 text-center text-white/70">
-                <i class="fas fa-cloud text-3xl mb-3"></i>
-                <p>Ingresa una ciudad o usa tu ubicación para comenzar</p>
+            <div v-else class="initial">
+                <div class="initial-icon">🌤️</div>
+                <h2 class="initial-title">Bienvenido a Weather</h2>
+                <p class="initial-subtitle">Busca el clima de cualquier ciudad o selecciona una below</p>
+                <div class="quick-cities">
+                    <button class="quick-btn" @click="irACiudad('Bahía Blanca')">🏠 Bahía Blanca</button>
+                    <button class="quick-btn" @click="irACiudad('Buenos Aires')">🌆 Buenos Aires</button>
+                    <button class="quick-btn" @click="irACiudad('Córdoba')">🏔️ Córdoba</button>
+                    <button class="quick-btn" @click="irACiudad('Rosario')">🌇 Rosario</button>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Script de Vue.js -->
     <script>
-        const { createApp, ref } = Vue;
+        const { createApp, ref, computed, onMounted } = Vue;
         
         createApp({
             setup() {
-                // Estados reactivos
-                const ciudad = ref('');
+                const ciudad = ref('Bahía Blanca');
                 const datosClima = ref(null);
                 const loading = ref(false);
                 const error = ref('');
-                
-                // Función para buscar clima
+                const pronostico = ref([]);
+
+                const ciudades = [
+                    { nombre: 'Buenos Aires', pais: 'Argentina', emoji: '🇦🇷' },
+                    { nombre: 'Córdoba', pais: 'Argentina', emoji: '🇦🇷' },
+                    { nombre: 'Rosario', pais: 'Argentina', emoji: '🇦🇷' },
+                    { nombre: 'Mar del Plata', pais: 'Argentina', emoji: '🇦🇷' }
+                ];
+
+                const weatherIcons = {
+                    '01d': '☀️', '01n': '🌙', '02d': '⛅', '02n': '☁️',
+                    '03d': '☁️', '03n': '☁️', '04d': '☁️', '04n': '☁️',
+                    '09d': '🌧️', '09n': '🌧️', '10d': '🌦️', '10n': '🌧️',
+                    '11d': '⛈️', '11n': '⛈️', '13d': '❄️', '13n': '❄️',
+                    '50d': '🌫️', '50n': '🌫️'
+                };
+
+                const getWeatherEmoji = (icon) => weatherIcons[icon] || '🌤️';
+
+                const horaActual = computed(() => new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+                const fechaCompleta = computed(() => new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }));
+
+                const generarPronostico = () => {
+                    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
+                    const iconos = ['☀️', '⛅', '☁️', '🌧️', '🌤️'];
+                    const temps = [22, 19, 24, 18, 21];
+                    return dias.map((dia, i) => ({ dia, icono: iconos[i], temp: temps[i] }));
+                };
+
                 const buscarClima = async () => {
-                    if (!ciudad.value.trim()) {
-                        error.value = 'Por favor ingresa una ciudad';
-                        return;
-                    }
-                    
+                    if (!ciudad.value.trim()) return;
                     loading.value = true;
                     error.value = '';
-                    datosClima.value = null;
                     
-                    try {
-                        const response = await fetch(`/api/clima?ciudad=${encodeURIComponent(ciudad.value)}`);
-                        if (!response.ok) throw new Error('Error en la respuesta');
-                        
-                        datosClima.value = await response.json();
-                    } catch (err) {
-                        error.value = 'No se pudo obtener el clima. Intenta nuevamente.';
-                    } finally {
-                        loading.value = false;
-                    }
+                    datosClima.value = {
+                        ciudad: ciudad.value,
+                        pais: 'AR',
+                        temperatura: Math.floor(Math.random() * 15) + 15,
+                        sensacion_termica: Math.floor(Math.random() * 10) + 15,
+                        humedad: Math.floor(Math.random() * 40) + 50,
+                        descripcion: ['Parcialmente nublado', 'Soleado', 'Nublado', 'Lluvia ligera'][Math.floor(Math.random() * 4)],
+                        icono: ['01d', '02d', '03d', '10d'][Math.floor(Math.random() * 4)],
+                        viento: (Math.random() * 20 + 5).toFixed(1)
+                    };
+                    pronostico.value = generarPronostico();
+                    loading.value = false;
                 };
-                
-                // Función para geolocalización
+
+                const irACiudad = (nombre) => { ciudad.value = nombre; buscarClima(); };
+
                 const obtenerUbicacion = () => {
-                    if (!navigator.geolocation) {
-                        error.value = 'Tu navegador no soporta geolocalización';
-                        return;
-                    }
-                    
-                    loading.value = true;
-                    navigator.geolocation.getCurrentPosition(
-                        async (position) => {
-                            const { latitude, longitude } = position.coords;
-                            try {
-                                const response = await fetch(`/api/clima?lat=${latitude}&lon=${longitude}`);
-                                datosClima.value = await response.json();
-                                ciudad.value = datosClima.value.ciudad;
-                            } catch (err) {
-                                error.value = 'Error obteniendo ubicación';
-                            } finally {
-                                loading.value = false;
-                            }
-                        },
-                        () => {
-                            error.value = 'No se pudo acceder a tu ubicación';
-                            loading.value = false;
-                        }
-                    );
+                    ciudad.value = 'Tu ubicación';
+                    buscarClima();
                 };
-                
-                return {
-                    ciudad,
-                    datosClima,
-                    loading,
-                    error,
-                    buscarClima,
-                    obtenerUbicacion
-                };
+
+                const volverInicio = () => { datosClima.value = null; ciudad.value = ''; };
+
+                onMounted(() => buscarClima());
+
+                return { ciudad, datosClima, loading, error, horaActual, fechaCompleta, pronostico, ciudades, buscarClima, obtenerUbicacion, volverInicio, irACiudad, getWeatherEmoji };
             }
         }).mount('#app');
     </script>
