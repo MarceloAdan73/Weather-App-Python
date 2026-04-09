@@ -1,38 +1,84 @@
-# 🌤️ Weather App 
+# 🌤️ Weather App - Dev
 
-A sleek and interactive web application for checking real-time weather with a modern and minimalist interface.
+Aplicación del clima desarrollada con FastAPI y Vue.js 3.
 
-## 🚀 Live Demo
-[View Live Application](https://app-clima-python.onrender.com)
+## 🚀 Desarrollo Local
 
-## ✨ Features
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/MarceloAdan73/app-clima-python.git
+cd app-clima-python
+git checkout dev
+```
 
-- **City Search**: Check weather for any city worldwide
-- **Auto Geolocation**: Get your current weather with one click
-- **Complete Data**: Temperature, humidity, wind speed, and feels-like
-- **Modern Interface**: Glassmorphism design with subtle gradients
-- **Responsive Design**: Optimized for desktop and mobile devices
-- **Real-Time Data**: Updated information from OpenWeatherMap API
+### 2. Crear archivo .env
+```bash
+echo "OPENWEATHER_API_KEY=tu_api_key_aqui" > .env
+```
 
-## 🎯 How to Use
+### 3. Instalar dependencias
+```bash
+pip install -r requirements.txt
+```
 
-1. **Manual Search**: Enter a city name and press Enter
-2. **Auto Location**: Click "My Location" for instant weather
-3. **View Data**: Check temperature, humidity, wind speed, and more
-4. **New Search**: Repeat to check different locations
+### 4. Ejecutar servidor
+```bash
+uvicorn main:app --reload
+```
 
-## 🛠️ Technologies Used
+La app estará disponible en: http://localhost:8000
 
-- **Vue.js 3** - Reactive JavaScript framework
-- **Tailwind CSS** - CSS utilities for modern design
-- **FastAPI** - Fast web framework for Python
-- **Python** - Server logic and API integration
+## 🌐 Despliegue en Render
 
-## 👨‍💻 Developer
+### Usando Blueprint (render.yaml)
 
-**Marcelo**  
-[View GitHub Profile](https://github.com/MarceloAdan73)
+1. Push a la rama `dev` en GitHub
+2. Conectar el repositorio en [Render Dashboard](https://dashboard.render.com)
+3. Render detectará automáticamente el `render.yaml`
+4. Configurar `OPENWEATHER_API_KEY` en Environment Variables
 
----
+### Usando Procfile
 
-Perfect for travelers and anyone needing accurate weather information! 🌦️
+1. Push cambios
+2. Crear nuevo Web Service en Render
+3. Configurar:
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+4. Añadir `OPENWEATHER_API_KEY` en Environment Variables
+
+## 📁 Estructura del Proyecto
+
+```
+weather-app/
+├── main.py           # Backend FastAPI
+├── templates/
+│   └── index.html    # Frontend Vue.js
+├── static/           # Archivos estáticos
+├── requirements.txt   # Dependencias Python
+├── render.yaml       # Configuración Render
+├── Procfile         # Proceso de inicio
+└── .env             # Variables de entorno (local)
+```
+
+## 🔧 API Endpoints
+
+| Endpoint | Descripción |
+|----------|-------------|
+| `GET /` | Página principal |
+| `GET /healthz` | Health check |
+| `GET /api/clima?ciudad={nombre}` | Clima por ciudad |
+| `GET /api/clima?lat={lat}&lon={lon}` | Clima por coordenadas |
+
+## 📝 Variables de Entorno
+
+| Variable | Descripción | Requerido |
+|----------|-------------|-----------|
+| `OPENWEATHER_API_KEY` | API Key de OpenWeatherMap | Sí (en producción) |
+| `PORT` | Puerto del servidor (automático en Render) | No |
+
+## 🎨 Stack Tecnológico
+
+- **Backend**: FastAPI + uvicorn
+- **Frontend**: Vue.js 3 + Font Awesome
+- **API**: OpenWeatherMap
+- **Despliegue**: Render

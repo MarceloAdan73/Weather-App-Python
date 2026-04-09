@@ -1,0 +1,15 @@
+# Render Blueprint
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: weather-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.11"
