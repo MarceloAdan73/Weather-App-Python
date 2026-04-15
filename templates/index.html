@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -512,12 +513,12 @@
                 </div>
                 <div class="logo-text">
                     <h1>Weather</h1>
-                    <span>Tu app del clima</span>
+                    <span>Weather app</span>
                 </div>
             </div>
 
             <div class="search-bar">
-                <input v-model="ciudad" @keypress.enter="buscarClima" type="text" placeholder="Buscar ciudad..." class="search-input">
+                <input v-model="ciudad" @keypress.enter="buscarClima" type="text" placeholder="Search city..." class="search-input">
                 <button v-if="datosClima" class="btn btn-ghost" @click="volver">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
@@ -545,7 +546,7 @@
             <div class="container">
                 <div v-if="loading" class="loading">
                     <div class="spinner"></div>
-                    <p class="loading-text">Buscando clima...</p>
+                    <p class="loading-text">Searching weather...</p>
                 </div>
 
                 <div v-else-if="error" class="error-box">{{ error }}</div>
@@ -574,7 +575,7 @@
                                     </svg>
                                 </div>
                                 <div class="stat-value">{{ datosClima.sensacion_termica }}°</div>
-                                <div class="stat-label">Sensación</div>
+                                <div class="stat-label">Feels like</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-icon">
@@ -583,7 +584,7 @@
                                     </svg>
                                 </div>
                                 <div class="stat-value">{{ datosClima.humedad }}%</div>
-                                <div class="stat-label">Humedad</div>
+                                <div class="stat-label">Humidity</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-icon">
@@ -591,8 +592,8 @@
                                         <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
                                     </svg>
                                 </div>
-                                <div class="stat-value">{{ datosClima.viento }}</div>
-                                <div class="stat-label">km/h</div>
+                                <div class="stat-value">{{ datosClima.viento }} km/h</div>
+                                <div class="stat-label">Wind</div>
                             </div>
                         </div>
                     </div>
@@ -603,7 +604,7 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                                 </svg>
-                                Pronóstico
+                                Forecast
                             </div>
                             <div class="forecast-row">
                                 <div class="forecast-item" v-for="(dia, index) in pronostico" :key="index" :class="{ active: index === 0 }">
@@ -619,7 +620,7 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>
                                 </svg>
-                                Ciudades
+                                Cities
                             </div>
                             <div class="cities-grid">
                                 <div class="city-card" v-for="c in ciudades" :key="c.nombre" @click="irACiudad(c.nombre)">
@@ -636,8 +637,8 @@
 
                 <div v-else class="initial-state">
                     <div class="initial-icon">🌤️</div>
-                    <h2 class="initial-title">Bienvenido</h2>
-                    <p class="initial-subtitle">Busca el clima de cualquier ciudad del mundo</p>
+                    <h2 class="initial-title">Welcome</h2>
+                    <p class="initial-subtitle">Search the weather for any city in the world</p>
                     <div class="quick-cities">
                         <button class="quick-btn" @click="irACiudad('Bahía Blanca')">🏠 Bahía Blanca</button>
                         <button class="quick-btn" @click="irACiudad('Buenos Aires')">🌆 Buenos Aires</button>
@@ -678,22 +679,22 @@
                 const getWeatherEmoji = (icon) => weatherIcons[icon] || '🌤️';
 
                 const generarPronostico = () => {
-                    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
+                    const dias = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
                     const iconos = ['☀️', '⛅', '☁️', '🌧️', '🌤️'];
                     const temps = [22, 19, 24, 18, 21];
                     return dias.map((dia, i) => ({ dia, icono: iconos[i], temp: temps[i] }));
                 };
 
                 const diaSemana = computed(() => {
-                    const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                    const dias = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                     return dias[new Date().getDay()];
                 });
 
                 const fechaCompleta = computed(() => {
                     const fecha = new Date();
                     const dia = fecha.getDate();
-                    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-                    return `${dia} de ${meses[fecha.getMonth()]} del ${fecha.getFullYear()}`;
+                    const meses = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    return `${meses[fecha.getMonth()]} ${dia}, ${fecha.getFullYear()}`;
                 });
 
                 const buscarClima = async () => {
@@ -704,7 +705,7 @@
                     error.value = '';
                     
                     setTimeout(() => {
-                        const descripciones = ['Soleado', 'Parcialmente nublado', 'Nublado', 'Lluvia ligera', 'Despejado'];
+                        const descripciones = ['Sunny', 'Partly cloudy', 'Cloudy', 'Light rain', 'Clear'];
                         const iconos = ['01d', '02d', '03d', '10d', '01n'];
                         
                         datosClima.value = {
